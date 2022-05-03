@@ -15,12 +15,13 @@ data <- read_csv("hk_data.csv")
 
 data$date <- strptime(data$`As of date`, format = "%d/%m/%Y")
 data$date <- as.POSIXct(data$date)
-
+#data$total <- data$`Number of cases tested positive for SARS-CoV-2 virus by nucleic acid tests` + data$`Number of cases tested positive for SARS-CoV-2 virus by rapid antigen tests`
+data$total <- rowSums(data[,c("Number of cases tested positive for SARS-CoV-2 virus by nucleic acid tests", "Number of cases tested positive for SARS-CoV-2 virus by rapid antigen tests")], na.rm=TRUE)
 data_filtered <- data%>%
-  select(date, `Number of cases tested positive for SARS-CoV-2 virus`) %>%
+  select(date, `total`) %>%
   filter(date >= as.POSIXct(Sys.Date()-15)) 
 
-data_filtered$new_cases <- data_filtered$`Number of cases tested positive for SARS-CoV-2 virus`-lag(data_filtered$`Number of cases tested positive for SARS-CoV-2 virus`)
+data_filtered$new_cases <- data_filtered$`total`-lag(data_filtered$`total`)
 
 #state_filtered$percent <- state_filtered$new_positives/state_filtered$total_number_of_tests*100
 data_filtered$testaverage <- rollmean(data_filtered$new_cases, 7, align='right', fill = NA)

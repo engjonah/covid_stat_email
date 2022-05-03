@@ -20,8 +20,8 @@ albany_filtered <- albany %>%
 
 albany_filtered <- subset(albany_filtered, select = -c(county, cumulative_number_of_positives, cumulative_number_of_tests))
 albany_filtered$percent <- albany_filtered$new_positives/albany_filtered$total_number_of_tests*100
-albany_filtered$testaverage <- rollmean(albany_filtered$new_positives, 7, align='right', fill = NA)
-albany_filtered$percentaverage <- rollmean(albany_filtered$percent, 7, align='right', fill = NA)
+albany_filtered$testaverage <- rollmean(albany_filtered$new_positives, 7, align='left', fill = NA)
+albany_filtered$percentaverage <- rollmean(albany_filtered$percent, 7, align='left', fill = NA)
 
 #View(albany_filtered)
 
@@ -30,8 +30,8 @@ ggplot(albany_filtered, aes(x=test_date, y=new_positives)) + geom_point() +
        y="Cases", x="Date", caption="Line Represents 7-Day Rolling Average\nMade by Jonah Eng") + 
   geom_line(aes(y=testaverage)) + 
   xlim(c(as.POSIXct(Sys.Date()-7), as.POSIXct(Sys.Date()-1))) + 
-  geom_line(aes(y=percentaverage/.05), color="aquamarine4") +
-  scale_y_continuous(sec.axis = sec_axis(~.*.05, name="Percent Positivity")) + 
+  geom_line(aes(y=percentaverage/((albany_filtered$percentaverage[1]+albany_filtered$percentaverage[7])/2/((albany_filtered$testaverage[7]+albany_filtered$testaverage[1])/2))), color="aquamarine4") +
+  scale_y_continuous(sec.axis = sec_axis(~.*((albany_filtered$percentaverage[1]+albany_filtered$percentaverage[7])/2/((albany_filtered$testaverage[7]+albany_filtered$testaverage[1])/2)), name="Percent Positivity")) + 
   theme(axis.title.y.right = element_text(color = "aquamarine4"),
         axis.text.y.right = element_text(color = "aquamarine4"))#+ 
   #scale_x_datetime(breaks = albany_filtered$test_date)
